@@ -3,6 +3,7 @@ package com.example.AprendendoSpring.controllers;
 import com.example.AprendendoSpring.models.Pessoa;
 import com.example.AprendendoSpring.services.AuthService;
 import com.example.AprendendoSpring.services.PessoaService;
+import com.example.AprendendoSpring.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,42 +24,49 @@ public class PessoaController {
     private PessoaService service;
 
     @Autowired
-    private AuthService auth;
+    private AuthUtil auth;
 
     @GetMapping("/buscarTodos")
     public List<Pessoa> buscarTodos(HttpServletRequest request){
         String basicAuth = request.getHeader("Authorization");
-        if(basicAuth.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        auth.validaBasicAuth(basicAuth);
-        return service.getAllPessoas();
+        return auth.validaUsuario(basicAuth) ? service.getAllPessoas() : Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public Pessoa buscarPorId(@PathVariable(value="id") Long id){
-        return service.getPessoa(id);
+    public Pessoa buscarPorId(@PathVariable(value="id") Long id, HttpServletRequest request){
+
+        String basicAuth = request.getHeader("Authorization");
+        return auth.validaUsuario(basicAuth) ? service.getPessoa(id) : null;
     }
 
     @PostMapping("/cadastrar")
-    public void cadastrar(@RequestBody Pessoa pessoa){
-        service.cadastrar(pessoa);
+    public void cadastrar(@RequestBody Pessoa pessoa, HttpServletRequest request){
+        String basicAuth = request.getHeader("Authorization");
+
+        if (auth.validaUsuario(basicAuth))
+            service.cadastrar(pessoa);
     }
 
     @DeleteMapping("/deletar")
-    public void deletar(@RequestBody Map<String,String> payload){
-        service.deletar(Long.valueOf(payload.get("id")));
+    public void deletar(@RequestBody Map<String,String> payload, HttpServletRequest request){
+        String basicAuth = request.getHeader("Authorization");
+
+        if (auth.validaUsuario(basicAuth))
+            service.deletar(Long.valueOf(payload.get("id")));
     }
 
     @DeleteMapping("/deletarTodos")
-    public void deletar(){
-        service.deletarTodos();
+    public void deletar(HttpServletRequest request){
+        String basicAuth = request.getHeader("Authorization");
+        if (auth.validaUsuario(basicAuth))
+            service.deletarTodos();
     }
 
     @PutMapping("/atualizar")
-    public void atualizar(@RequestBody Map<String,String> payload) throws ParseException {
-        service.atualizar(payload);
+    public void atualizar(@RequestBody Map<String,String> payload, HttpServletRequest request) throws ParseException {
+        String basicAuth = request.getHeader("Authorization");
+        if (auth.validaUsuario(basicAuth))
+            service.atualizar(payload);
     }
 
     @GetMapping("/help")

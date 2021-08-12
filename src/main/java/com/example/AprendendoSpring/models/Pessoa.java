@@ -10,7 +10,7 @@ import java.util.Date;
 public class Pessoa {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     private String nome, sexo, email, naturalidade, nacionalidade;
     private Date data_inclusao, data_atualizacao;
