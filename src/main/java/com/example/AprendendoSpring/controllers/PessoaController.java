@@ -1,11 +1,16 @@
 package com.example.AprendendoSpring.controllers;
 
 import com.example.AprendendoSpring.models.Pessoa;
+import com.example.AprendendoSpring.services.AuthService;
 import com.example.AprendendoSpring.services.PessoaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.http.HttpHeaders;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +22,17 @@ public class PessoaController {
     @Autowired
     private PessoaService service;
 
+    @Autowired
+    private AuthService auth;
+
     @GetMapping("/buscarTodos")
-    public List<Pessoa> buscarTodos(){
+    public List<Pessoa> buscarTodos(HttpServletRequest request){
+        String basicAuth = request.getHeader("Authorization");
+        if(basicAuth.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        auth.validaBasicAuth(basicAuth);
         return service.getAllPessoas();
     }
 
